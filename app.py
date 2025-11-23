@@ -20,6 +20,18 @@ def ensure_database_initialized():
     if not os.path.exists('hospital.db'):
         from init_db import init_database
         init_database()
+    else:
+        # Verify users exist, if not reinitialize
+        conn = sqlite3.connect('hospital.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        count = cursor.fetchone()[0]
+        conn.close()
+        
+        if count == 0:
+            # Reinitialize if no users found
+            from init_db import init_database
+            init_database()
 
 # Initialize database before importing modules
 ensure_database_initialized()

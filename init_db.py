@@ -12,7 +12,7 @@ def init_database():
     print("🔧 Initializing hospital database...")
     
     # Connect to database (creates file if doesn't exist)
-    conn = sqlite3.connect('hospital.db')
+    conn = sqlite3.connect('hospital.db', timeout=10.0)
     cursor = conn.cursor()
     
     # Create users table
@@ -26,6 +26,9 @@ def init_database():
         )
     """)
     
+    # Commit after creating table
+    conn.commit()
+    
     # Create patients table
     print("📋 Creating patients table...")
     cursor.execute("""
@@ -37,6 +40,7 @@ def init_database():
             date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    conn.commit()
     
     # Create logs table
     print("📋 Creating logs table...")
@@ -51,6 +55,7 @@ def init_database():
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )
     """)
+    conn.commit()
     
     # Check if users already exist
     cursor.execute("SELECT COUNT(*) FROM users")
