@@ -17,20 +17,35 @@ import sqlite3
 # Auto-initialize database if it doesn't exist
 def ensure_database_initialized():
     """Ensure database is initialized with schema and default users"""
+    from init_db import init_database
+    
     if not os.path.exists('hospital.db'):
-        from init_db import init_database
+        # Database doesn't exist, create it
         init_database()
     else:
-        # Verify users exist, if not reinitialize
-        conn = sqlite3.connect('hospital.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM users")
-        count = cursor.fetchone()[0]
-        conn.close()
-        
-        if count == 0:
-            # Reinitialize if no users found
-            from init_db import init_database
+        # Database exists, check if users table has data
+        try:
+            conn = sqlite3.connect('hospital.db')
+            cursor = conn.cursor()
+            # Check if users table exists and has data
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                cursor.execute("SELECT COUNT(*) FROM users")
+                count = cursor.fetchone()[0]
+                conn.close()
+                
+                if count == 0:
+                    # Table exists but no users, reinitialize
+                    init_database()
+            else:
+                # Table doesn't exist, initialize
+                conn.close()
+                init_database()
+        except Exception as e:
+            print(f"Database check error: {e}")
+            # If any error, reinitialize
             init_database()
 
 # Initialize database before importing modules
