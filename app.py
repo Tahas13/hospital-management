@@ -11,6 +11,18 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import time
+import os
+import sqlite3
+
+# Auto-initialize database if it doesn't exist
+def ensure_database_initialized():
+    """Ensure database is initialized with schema and default users"""
+    if not os.path.exists('hospital.db'):
+        from init_db import init_database
+        init_database()
+
+# Initialize database before importing modules
+ensure_database_initialized()
 
 # Import custom modules
 from auth import (
